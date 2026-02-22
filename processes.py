@@ -11,10 +11,12 @@ class Processes:
     def __init__(self):
         self.processes = []
         self.suspicious_processes = []
+        self.process_cache = {}
         self.threats = []
         self.running = False
         self.lock = threading.Lock()
         self.reported_pids = set()
+        self.action_history = []
         self.quarantine_folder = "C:\\Quarantine"
         if not os.path.exists(self.quarantine_folder): os.mkdir(self.quarantine_folder)
 
@@ -22,26 +24,42 @@ class Processes:
         pid = proc_data["PID"]
         path = proc_data["Path"]
         name = proc_data["Name"]
+        history_entry = {
+            "PID": proc_data["PID"],
+            "Name": proc_data["Name"],
+            "Action": "KILLED AND QUARANTINED",
+            "Time": time.strftime("%Y-%m-%d %H:%M:%S")
+        }
 
         try:
+            if not psutil.pid_exists(pid):
+                return "NEUTRALIZED"
             process = psutil.Process(pid)
             if name.lower() == "virus.exe":
+                self.action_history.append(history_entry)
                 if process.is_running():
                     process.suspend()
                 time.sleep(0.1)
                 process.terminate()
                 time.sleep(0.1)
                 self.quarantine_file(path)
+
                 return "Killed & Quarantined (Name Match)"
 
             if detection_count > 3:
+                self.action_history.append(history_entry)
                 process.suspend()
+                # trigger mem dump
+                self.create_dump(pid)
                 process.terminate()
                 time.sleep(0.1)
                 self.quarantine_file(path)
                 return f"Suspended & Quarantined (High Detection Rate) {detection_count} Detections"
+
             if proc_data["Mem"] > 500:
                 return "Warning: High Memory Usage"
+            if proc_data["CPU"] > 80:
+                return "Warning: High CPU Usage"
         except psutil.AccessDenied:
             return "Action Denied (System Protected)"
         except Exception as e:
@@ -71,25 +89,57 @@ class Processes:
             return False
 
     def get_processes_snapshot(self):
-        """Standard scan of all system processes."""
+        """Standard scan of all system processes with accurate CPU tracking."""
         temp = []
-        for proc in psutil.process_iter(['pid', 'name', 'memory_info']):
+        active_pids = set()
+
+        # We iterate over PIDs to manage our cache
+        for proc in psutil.process_iter(['pid', 'name']):
             try:
-                # Basic stats
-                mem = proc.info['memory_info'].rss / (1024 * 1024)
+                pid = proc.info['pid']
+                active_pids.add(pid)
+
+                # Retrieve the cached object or create a new one if it's new
+                if pid not in self.process_cache:
+                    # We create the object once and store it
+                    self.process_cache[pid] = proc
+
+                p = self.process_cache[pid]
+
+
+                # IMPORTANT: Get stats from the persistent object
+                # interval=None makes this non-blocking (required for UI performance)
+                cpu = p.cpu_percent(interval=None)
+                mem_info = p.memory_info()
+                mem = mem_info.rss / (1024 * 1024)
+
+                # Note: proc.exe() is slow/heavy, only call it if necessary or once
+                try:
+                    path = p.exe()
+                except:
+                    path = "N/A"
+
                 temp.append({
-                    "PID": proc.info['pid'],
+                    "PID": pid,
                     "Name": proc.info['name'],
                     "Mem": mem,
-                    "Path": proc.exe()
+                    "CPU": cpu,
+                    "Path": path
                 })
+
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
 
+        # Clean up the cache so we don't leak memory for closed processes
+        self.process_cache = {pid: p for pid, p in self.process_cache.items() if pid in active_pids}
+
         with self.lock:
             self.processes = temp
-            # Update suspicious list (e.g., processes > 500MB)
-            self.suspicious_processes = [p for p in temp if p["Mem"] > 500]
+            # This will now catch the 80% spikes correctly!
+            self.suspicious_processes = [
+                p for p in temp
+                if p["Mem"] > 500 or p["CPU"] > 80 or p["Name"].lower() == "virus.exe"
+            ]
 
     def _monitor_loop(self, interval):
         while self.running:
@@ -126,11 +176,12 @@ class Processes:
 
         for proc in to_check:
             pid = proc["PID"]
+            path = proc["Path"]
             if pid in self.reported_pids: continue
 
             file_hash = self.compute_hash(proc["Path"])
             if file_hash and file_hash != "TOO_LARGE":
-                result = vt_checker.check_file_hash(file_hash)
+                result = vt_checker.check_file_hash(file_hash, file_path=path)
                 if result and result["detections"] > 3:
                     with self.lock:
                         self.threats.append({**proc, "detections": result["detections"]})

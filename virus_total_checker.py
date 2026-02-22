@@ -5,7 +5,7 @@ class VirusTotalChecker:
         self.client = client
         self.cache = {}
 
-    def check_file_hash(self, file_hash):
+    def check_file_hash(self, file_hash, file_path=None):
         if file_hash in self.cache:
             return self.cache[file_hash]
 
@@ -16,8 +16,16 @@ class VirusTotalChecker:
             self.cache[file_hash] = result
             return result
         except vt.error.APIError as e:
-            if e.code == "NotFoundError":
-                self.cache[file_hash] = {"detections": 0}
+            if e.code == "NotFoundError" and file_path:
+                try:
+                    with open(file_path, "rb") as f:
+                        self.client.scan_file(f)  # This uploads the file
+                    return {"detections": 1, "status": "Uploaded for Analysis"}
+
+                except Exception:
+                    return None
+            return None
+        except RuntimeError:
             return None
         except Exception:
             return None
