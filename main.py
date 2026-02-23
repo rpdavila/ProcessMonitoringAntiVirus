@@ -72,6 +72,7 @@ def security_worker(pm, vt_checker):
 
         with pm.lock:
             for entry in pm.action_history:
+                print("Checking history entry:")
                 if entry.get("VT_Status") in [None, "Waiting..."]:
                     q_path = os.path.join(pm.quarantine_folder, entry["Name"])
 
@@ -79,7 +80,9 @@ def security_worker(pm, vt_checker):
 
                     if current_hash:
                         result = vt_checker.check_file_hash(current_hash, q_path)
+
                         if result:
+                            print(f"Result: {result}")
                             entry["VT_Status"] = result["Status"]
                             if result.get("detections", 0) > 3:
                                 entry["Action"] = "CONFIRMED MALICIOUS"
