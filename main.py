@@ -30,13 +30,26 @@ def generate_dashboard(pm):
         # 1. Display History (Killed threats)
         # We use a reversed list so the newest kills are at the top
         for entry in reversed(pm.action_history[-5:]):
+
+            status = entry.get("VT_Status", "Waiting...")
+            # Logic to make the 'Loading' state stand out
+            if "QUEUED" in status or "Uploading" in status:
+                status_display = f"[bold blink yellow]⏳ {status}[/bold blink yellow]"
+            elif "MALICIOUS" in status or "THREAT" in status:
+                status_display = f"[bold red]❌ {status}[/bold red]"
+            elif "CLEAN" in status:
+                status_display = f"[bold green]✅ {status}[/bold green]"
+            else:
+                status_display = f"[dim]{status}[/dim]"
+
             table.add_row(
-                "🛡️ [bold cyan]HISTORY[/bold cyan]",
+                "🛡️ HISTORY",
                 str(entry['PID']),
                 entry['Name'],
-                f"[bold white on red] {entry['Action']} [/bold white on red]",
-                f"[dim]{entry['Time']}[/dim]"
+                f"[bold white on red] TERMINATED [/bold white on red]",
+                status_display
             )
+
 
         # 2. Display Suspicious (Live threats being analyzed)
         for p in pm.suspicious_processes:
@@ -72,7 +85,6 @@ def security_worker(pm, vt_checker):
 
         with pm.lock:
             for entry in pm.action_history:
-                print("Checking history entry:")
                 if entry.get("VT_Status") in [None, "Waiting..."]:
                     q_path = os.path.join(pm.quarantine_folder, entry["Name"])
 
@@ -82,7 +94,6 @@ def security_worker(pm, vt_checker):
                         result = vt_checker.check_file_hash(current_hash, q_path)
 
                         if result:
-                            print(f"Result: {result}")
                             entry["VT_Status"] = result["Status"]
                             if result.get("detections", 0) > 3:
                                 entry["Action"] = "CONFIRMED MALICIOUS"

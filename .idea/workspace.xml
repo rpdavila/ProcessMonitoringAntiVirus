@@ -4,9 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="70c9e51d-ec40-4eda-8d9d-935b919014df" name="Changes" comment="trying to integrate all parts together">
-      <change beforePath="$PROJECT_DIR$/.idea/ProcessMonitoringAntiVirus.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ProcessMonitoringAntiVirus.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="70c9e51d-ec40-4eda-8d9d-935b919014df" name="Changes" comment="some auto changes with ide">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -158,7 +157,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771867655026</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="some auto changes with ide">
+      <option name="closed" value="true" />
+      <created>1771876315522</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1771876315522</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -182,7 +189,8 @@
     <MESSAGE value="working program" />
     <MESSAGE value="added is protected for system files safety when above threshold to not be deleted" />
     <MESSAGE value="trying to integrate all parts together" />
-    <option name="LAST_COMMIT_MESSAGE" value="trying to integrate all parts together" />
+    <MESSAGE value="some auto changes with ide" />
+    <option name="LAST_COMMIT_MESSAGE" value="some auto changes with ide" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
