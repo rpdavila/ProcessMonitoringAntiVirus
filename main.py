@@ -27,28 +27,56 @@ def generate_dashboard(pm):
     table.add_column("Resource", width=15, justify="right")
 
     with pm.lock:
-        # Display Terminal History (The Kills)
-        for entry in pm.action_history[-3:]:
-            table.add_row("🛡️ HISTORY", str(entry['PID']), entry['Name'],
-                          "[bold white on red] TERMINATED [/bold white on red]", "0.0 MB")
+        # 1. Display History (Killed threats)
+        # We use a reversed list so the newest kills are at the top
+        for entry in reversed(pm.action_history[-5:]):
+            table.add_row(
+                "🛡️ [bold cyan]HISTORY[/bold cyan]",
+                str(entry['PID']),
+                entry['Name'],
+                f"[bold white on red] {entry['Action']} [/bold white on red]",
+                f"[dim]{entry['Time']}[/dim]"
+            )
 
-        # Display Suspicious Processes (Live Analysis)
+        # 2. Display Suspicious (Live threats being analyzed)
         for p in pm.suspicious_processes:
-            # Immediate behavior check
-            action = pm.apply_policy(p, 0)
-            table.add_row("⚠️ ANOMALY", str(p['PID']), p['Name'],
-                          f"[yellow]{action}[/yellow]", f"{p['Mem']:.1f} MB")
+            # If this process name was just killed, don't show it as an anomaly anymore
+            if any(h['Name'] == p['Name'] for h in pm.action_history):
+                continue
 
-    return Panel(table, title="[bold red]CyberDefender Active Protection[/bold red]")
+            table.add_row(
+                "⚠️ [bold yellow]ANOMALY[/bold yellow]",
+                str(p['PID']),
+                p['Name'],
+                "[yellow]ANALYZING BEHAVIOR...[/yellow]",
+                f"{p['Mem']:.1f} MB"
+            )
+
+    return Panel(table, title="[bold red]CyberDefender Active Protection[/bold red]",
+                 subtitle="Heuristic Engine: ACTIVE")
 
 
 def security_worker(pm, vt_checker):
+    """The 'Executioner' thread."""
     while pm.running:
+        # Step 1: Check everything in the suspicious list for behavioral violations
+        with pm.lock:
+            # Create a local copy to avoid locking issues
+            to_process = list(pm.suspicious_processes)
+
+        for p in to_process:
+            # We call apply_policy here. This is where the kill actually happens.
+            pm.apply_policy(p, 0)
+
+            # Step 2: Check Cloud Intelligence (VirusTotal)
         pm.check_suspicious_with_vt(vt_checker)
+
+        # Step 3: If VT found something, kill it specifically
         with pm.lock:
             for threat in pm.threats:
                 pm.apply_policy(threat, threat.get('detections', 0))
-        time.sleep(1)
+
+        time.sleep(0.5)
 
 
 if __name__ == "__main__":
@@ -61,10 +89,11 @@ if __name__ == "__main__":
     sec_thread.start()
 
     try:
-        with Live(generate_dashboard(pm), refresh_per_second=2, screen=True) as live:
+        # Use screen=False if you want to see debug prints in the terminal
+        with Live(generate_dashboard(pm), refresh_per_second=4, screen=True) as live:
             while True:
                 live.update(generate_dashboard(pm))
-                time.sleep(0.5)
+                time.sleep(0.25)
     except KeyboardInterrupt:
         pm.stop_monitoring()
         client.close()

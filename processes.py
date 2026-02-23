@@ -24,7 +24,8 @@ class Processes:
         self.protected_names = {
             "smss.exe", "csrss.exe", "wininit.exe", "services.exe",
             "lsass.exe", "winlogon.exe", "svchost.exe", "explorer.exe",
-            "dwm.exe", "runtimebroker.exe", "searchhost.exe", "taskmgr.exe"
+            "dwm.exe", "runtimebroker.exe", "searchhost.exe", "taskmgr.exe",
+            "memory compression", "system", "registry"  # <--- Added these
         }
         self.vm_infra = {"vmware.exe", "vmware-vmx.exe", "vmnat.exe", "vmware-authd.exe"}
 
@@ -44,7 +45,6 @@ class Processes:
         return False
 
     def apply_policy(self, proc_data, detection_count):
-        """Logic Gate: Signature vs. Behavior."""
         pid = proc_data["PID"]
         name = proc_data["Name"]
         path = proc_data["Path"]
@@ -52,21 +52,26 @@ class Processes:
         try:
             if not psutil.pid_exists(pid): return "NEUTRALIZED"
 
-            # TRIGGER 1: Signature (VT or Name)
-            is_malicious = (name.lower() == "virus.exe" or detection_count > 3)
-
-            # TRIGGER 2: Heuristic (Anomalous Resources)
+            is_malicious = (detection_count > 3)
+            # Behavioral check: trigger if NOT protected and over limits
             is_anomaly = (proc_data["Mem"] > 500 or proc_data["CPU"] > 80) and not self.is_protected(pid, name, path)
 
             if is_malicious or is_anomaly:
-                # Use Taskkill /IM to kill all replicated clones by name
-                subprocess.run(["taskkill", "/F", "/T", "/IM", name], capture_output=True)
+                reason = "Cloud Intelligence" if is_malicious else "Resource Anomaly"
 
-                entry = {"PID": pid, "Name": name, "Action": "TERMINATED", "Time": time.strftime("%H:%M:%S")}
+                # 1. Log to history FIRST so the UI updates immediately
                 with self.lock:
-                    if not any(h['Name'] == name for h in self.action_history):
-                        self.action_history.append(entry)
+                    if not any(h['PID'] == pid for h in self.action_history):
+                        self.action_history.append({
+                            "PID": pid,
+                            "Name": name,
+                            "Action": "QUARANTINED",
+                            "Reason": reason,  # Match what Main.py expects
+                            "Time": time.strftime("%H:%M:%S")
+                        })
 
+                # 2. Kill and Quarantine
+                subprocess.run(["taskkill", "/F", "/T", "/IM", name], capture_output=True)
                 self.quarantine_file(path)
                 return "KILL_SUCCESS"
 
@@ -75,7 +80,7 @@ class Processes:
 
         except Exception as e:
             return f"Policy Error: {e}"
-        return "CLEAN"
+        return "ANALYZING BEHAVIOR"
 
     def get_processes_snapshot(self):
         temp = []
@@ -107,12 +112,15 @@ class Processes:
 
         with self.lock:
             self.processes = temp
-            # Filter for anomalies that aren't protected
-            self.suspicious_processes = [
-                p for p in temp
-                if (p["Mem"] > 400 or p["CPU"] > 60 or p["Name"].lower() == "virus.exe")
-                   and not self.is_protected(p["PID"], p["Name"], p["Path"])
-            ]
+            self.suspicious_processes = []
+            for p in temp:
+                path_l = p["Path"].lower()
+                # If it's in a user folder (Desktop/Downloads), we are more aggressive
+                is_user_area = "users" in path_l and ("desktop" in path_l or "downloads" in path_l)
+
+                if (p["Mem"] > 100 and is_user_area) or p["Mem"] > 400 or p["CPU"] > 60:
+                    if not self.is_protected(p["PID"], p["Name"], p["Path"]):
+                        self.suspicious_processes.append(p)
 
     def quarantine_file(self, file_path):
         try:
