@@ -25,7 +25,7 @@ class Processes:
             "smss.exe", "csrss.exe", "wininit.exe", "services.exe",
             "lsass.exe", "winlogon.exe", "svchost.exe", "explorer.exe",
             "dwm.exe", "runtimebroker.exe", "searchhost.exe", "taskmgr.exe",
-            "memory compression", "system", "registry"  # <--- Added these
+            "memcompression", "system", "registry"  # <--- Added these
         }
         self.vm_infra = {"vmware.exe", "vmware-vmx.exe", "vmnat.exe", "vmware-authd.exe"}
 
