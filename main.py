@@ -57,7 +57,6 @@ def generate_dashboard(pm):
             is_active = psutil.pid_exists(threat['PID'])
             if is_active:
                 status_text = "[bold white on red]ACTIVE THREAT[/bold white on red]"
-
             else:
                 status_text = "[bold white on green]THREAT NEUTRALIZED[/bold white on green]"
             table.add_row(

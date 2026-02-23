@@ -1,5 +1,4 @@
 import shutil
-
 import psutil
 import threading
 import time
@@ -18,7 +17,28 @@ class Processes:
         self.reported_pids = set()
         self.action_history = []
         self.quarantine_folder = "C:\\Quarantine"
+        self.protected_pids = {0,4}
+        self.protected_names = {
+            "smss.exe", "csrss.exe", "wininit.exe", "services.exe",
+            "lsass.exe", "winlogon.exe", "svchost.exe", "explorer.exe",
+            "dwm.exe", "runtimebroker.exe", "searchhost.exe", "taskmgr.exe",
+            "conhost.exe", "fontdrvhost.exe", "shellexperiencehost.exe"
+        }
+        self.vm_infra = {"vmware.exe", "vmware-vmx.exe", "vmnat.exe", "vmware-authd.exe"}
         if not os.path.exists(self.quarantine_folder): os.mkdir(self.quarantine_folder)
+    def is_protected(self, pid, name, path):
+        """Tiered trust model"""
+        name_l = name.lower()
+        path_l = path.lower() if path else ""
+
+        if pid in self.protected_pids or pid == os.getpid():
+            return True
+
+        if name_l in self.protected_names or name_l in self.vm_infra:
+            return True
+        if "c:\\windows" in path_l or "c:\\program files" in path_l:
+            return True
+        return False
 
     def apply_policy(self, proc_data, detection_count):
         pid = proc_data["PID"]
@@ -40,6 +60,7 @@ class Processes:
                 if process.is_running():
                     process.suspend()
                 time.sleep(0.1)
+                self.create_dump(pid)
                 process.terminate()
                 time.sleep(0.1)
                 self.quarantine_file(path)
@@ -59,6 +80,7 @@ class Processes:
             if proc_data["Mem"] > 500:
                 return "Warning: High Memory Usage"
             if proc_data["CPU"] > 80:
+
                 return "Warning: High CPU Usage"
         except psutil.AccessDenied:
             return "Action Denied (System Protected)"

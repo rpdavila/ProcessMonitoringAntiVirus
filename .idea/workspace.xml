@@ -5,37 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="70c9e51d-ec40-4eda-8d9d-935b919014df" name="Changes" comment="working program">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/Analysis-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/EXE-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/PKG-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/PYZ-00.pyz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/PYZ-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/base_library.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/mock_virus.pkg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/warn-mock_virus.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/mock_virus/xref-mock_virus.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/Analysis-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/EXE-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/PKG-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/PYZ-00.pyz" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/PYZ-00.toc" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/base_library.zip" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/stress_test.pkg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/warn-stress_test.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/stress_test/xref-stress_test.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/eicar.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/stress_test.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dist/virus.exe" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mock_virus.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/ProcessMonitoringAntiVirus.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ProcessMonitoringAntiVirus.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/processes.py" beforeDir="false" afterPath="$PROJECT_DIR$/processes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stress_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/virus_total_checker.py" beforeDir="false" afterPath="$PROJECT_DIR$/virus_total_checker.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,22 +38,22 @@
     &quot;assignee&quot;: &quot;rpdavila&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/rpdavila/ProcessMonitoringAntiVirus.git",
-    "accountId": "67d0ee08-8b9a-44c8-b5b8-1db33876d461"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/rpdavila/ProcessMonitoringAntiVirus.git&quot;,
+    &quot;accountId&quot;: &quot;67d0ee08-8b9a-44c8-b5b8-1db33876d461&quot;
   },
-  "recentNewPullRequestHead": {
-    "server": {
-      "useHttp": false,
-      "host": "github.com",
-      "port": null,
-      "suffix": null
+  &quot;recentNewPullRequestHead&quot;: {
+    &quot;server&quot;: {
+      &quot;useHttp&quot;: false,
+      &quot;host&quot;: &quot;github.com&quot;,
+      &quot;port&quot;: null,
+      &quot;suffix&quot;: null
     },
-    "owner": "rpdavila",
-    "repository": "ProcessMonitoringAntiVirus"
+    &quot;owner&quot;: &quot;rpdavila&quot;,
+    &quot;repository&quot;: &quot;ProcessMonitoringAntiVirus&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -94,35 +66,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.main.executor": "Debug",
-    "Python.processes.executor": "Debug",
-    "Python.stress_test.executor": "Run",
-    "Python.test_vt.executor": "Run",
-    "Python.virus_total_checker.executor": "Debug",
-    "RunOnceActivity.MCP Project settings loaded": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "ai.playground.ignore.import.keys.banner.in.settings": "true",
-    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "master",
-    "ignore.virus.scanning.warn.message": "true",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "C:/Users/win/Desktop/ProcessMonitoringAntiVirus",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "to.speed.mode.migration.done": "true",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.processes.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.stress_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test_vt.executor&quot;: &quot;Run&quot;,
+    &quot;Python.virus_total_checker.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/win/Desktop/ProcessMonitoringAntiVirus&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -148,7 +120,8 @@
       <workItem from="1771797977925" duration="269000" />
       <workItem from="1771798535800" duration="101000" />
       <workItem from="1771799083750" duration="908000" />
-      <workItem from="1771802162568" duration="304000" />
+      <workItem from="1771802162568" duration="468000" />
+      <workItem from="1771834141261" duration="8318000" />
     </task>
     <task id="LOCAL-00001" summary="version 1">
       <option name="closed" value="true" />
@@ -158,7 +131,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771612410203</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="working program">
+      <option name="closed" value="true" />
+      <created>1771802609924</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1771802609926</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -177,8 +158,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="version 1" />
-    <MESSAGE value="Merge pull request #1&#10;&#10;Working ui with policies" />
     <MESSAGE value="Working ui with policies" />
+    <MESSAGE value="Merge pull request #1&#10;&#10;Working ui with policies" />
     <MESSAGE value="working program" />
     <option name="LAST_COMMIT_MESSAGE" value="working program" />
   </component>
