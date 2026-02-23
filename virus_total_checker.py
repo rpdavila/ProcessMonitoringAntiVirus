@@ -17,15 +17,7 @@ class VirusTotalChecker:
             return result
         except vt.error.APIError as e:
             if e.code == "NotFoundError" and file_path:
-                try:
-                    with open(file_path, "rb") as f:
-                        self.client.scan_file(f)  # This uploads the file
-                    return {"detections": 1, "status": "Uploaded for Analysis"}
-
-                except Exception:
-                    return None
-            return None
-        except RuntimeError:
+                return {"detections": 0, "status": "Unknown/Clean"}
             return None
         except Exception:
             return None

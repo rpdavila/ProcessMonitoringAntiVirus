@@ -4,6 +4,7 @@ import threading
 import time
 import hashlib
 import os
+import subprocess
 
 
 class Processes:
@@ -17,195 +18,143 @@ class Processes:
         self.reported_pids = set()
         self.action_history = []
         self.quarantine_folder = "C:\\Quarantine"
-        self.protected_pids = {0,4}
+
+        # SYSTEM PROTECTION (Lab Safety)
+        self.protected_pids = {0, 4}
         self.protected_names = {
             "smss.exe", "csrss.exe", "wininit.exe", "services.exe",
             "lsass.exe", "winlogon.exe", "svchost.exe", "explorer.exe",
-            "dwm.exe", "runtimebroker.exe", "searchhost.exe", "taskmgr.exe",
-            "conhost.exe", "fontdrvhost.exe", "shellexperiencehost.exe"
+            "dwm.exe", "runtimebroker.exe", "searchhost.exe", "taskmgr.exe"
         }
         self.vm_infra = {"vmware.exe", "vmware-vmx.exe", "vmnat.exe", "vmware-authd.exe"}
-        if not os.path.exists(self.quarantine_folder): os.mkdir(self.quarantine_folder)
+
+        if not os.path.exists(self.quarantine_folder):
+            os.makedirs(self.quarantine_folder)
+
     def is_protected(self, pid, name, path):
-        """Tiered trust model"""
         name_l = name.lower()
         path_l = path.lower() if path else ""
-
         if pid in self.protected_pids or pid == os.getpid():
             return True
-
         if name_l in self.protected_names or name_l in self.vm_infra:
             return True
-        if "c:\\windows" in path_l or "c:\\program files" in path_l:
+        # Allow behavioral scan on user apps, but skip core Windows files
+        if ("c:\\windows" in path_l or "c:\\program files" in path_l) and name_l != "virus.exe":
             return True
         return False
 
     def apply_policy(self, proc_data, detection_count):
+        """Logic Gate: Signature vs. Behavior."""
         pid = proc_data["PID"]
-        path = proc_data["Path"]
         name = proc_data["Name"]
-        history_entry = {
-            "PID": proc_data["PID"],
-            "Name": proc_data["Name"],
-            "Action": "KILLED AND QUARANTINED",
-            "Time": time.strftime("%Y-%m-%d %H:%M:%S")
-        }
+        path = proc_data["Path"]
 
         try:
-            if not psutil.pid_exists(pid):
-                return "NEUTRALIZED"
-            process = psutil.Process(pid)
-            if name.lower() == "virus.exe":
-                self.action_history.append(history_entry)
-                if process.is_running():
-                    process.suspend()
-                time.sleep(0.1)
-                self.create_dump(pid)
-                process.terminate()
-                time.sleep(0.1)
+            if not psutil.pid_exists(pid): return "NEUTRALIZED"
+
+            # TRIGGER 1: Signature (VT or Name)
+            is_malicious = (name.lower() == "virus.exe" or detection_count > 3)
+
+            # TRIGGER 2: Heuristic (Anomalous Resources)
+            is_anomaly = (proc_data["Mem"] > 500 or proc_data["CPU"] > 80) and not self.is_protected(pid, name, path)
+
+            if is_malicious or is_anomaly:
+                # Use Taskkill /IM to kill all replicated clones by name
+                subprocess.run(["taskkill", "/F", "/T", "/IM", name], capture_output=True)
+
+                entry = {"PID": pid, "Name": name, "Action": "TERMINATED", "Time": time.strftime("%H:%M:%S")}
+                with self.lock:
+                    if not any(h['Name'] == name for h in self.action_history):
+                        self.action_history.append(entry)
+
                 self.quarantine_file(path)
+                return "KILL_SUCCESS"
 
-                return "Killed & Quarantined (Name Match)"
+            if proc_data["Mem"] > 400: return "WARN: High RAM"
+            if proc_data["CPU"] > 60: return "WARN: High CPU"
 
-            if detection_count > 3:
-                self.action_history.append(history_entry)
-                process.suspend()
-                # trigger mem dump
-                self.create_dump(pid)
-                process.terminate()
-                time.sleep(0.1)
-                self.quarantine_file(path)
-                return f"Suspended & Quarantined (High Detection Rate) {detection_count} Detections"
-
-            if proc_data["Mem"] > 500:
-                return "Warning: High Memory Usage"
-            if proc_data["CPU"] > 80:
-
-                return "Warning: High CPU Usage"
-        except psutil.AccessDenied:
-            return "Action Denied (System Protected)"
         except Exception as e:
-            return f"Action Failed: {e}"
-
-        return "Clean"
-
-    def quarantine_file(self, file_path):
-        try:
-            if os.path.exists(file_path):
-                file_name = os.path.basename(file_path)
-                dest = os.path.join(self.quarantine_folder, file_name)
-                shutil.move(file_path, dest)
-        except Exception:
-            pass
-
-    def create_dump(self, pid):
-        """Captures memory state before killing the threat."""
-        try:
-            dump_file = os.path.join(self.quarantine_folder, f"dump_pid_{pid}.dmp")
-            # Using subprocess to run the external procdump tool
-            import subprocess
-            subprocess.run(["procdump.exe", "-ma", str(pid), dump_file],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return True
-        except:
-            return False
+            return f"Policy Error: {e}"
+        return "CLEAN"
 
     def get_processes_snapshot(self):
-        """Standard scan of all system processes with accurate CPU tracking."""
         temp = []
         active_pids = set()
 
-        # We iterate over PIDs to manage our cache
         for proc in psutil.process_iter(['pid', 'name']):
             try:
                 pid = proc.info['pid']
                 active_pids.add(pid)
 
-                # Retrieve the cached object or create a new one if it's new
-                if pid not in self.process_cache:
-                    # We create the object once and store it
-                    self.process_cache[pid] = proc
+                # Maintain persistent process objects for accurate CPU tracking
+                p = self.process_cache.setdefault(pid, proc)
 
-                p = self.process_cache[pid]
+                cpu = p.cpu_percent(interval=None) / psutil.cpu_count()
+                mem = p.memory_info().rss / (1024 * 1024)
 
-
-                # IMPORTANT: Get stats from the persistent object
-                # interval=None makes this non-blocking (required for UI performance)
-                cpu = p.cpu_percent(interval=None)
-                mem_info = p.memory_info()
-                mem = mem_info.rss / (1024 * 1024)
-
-                # Note: proc.exe() is slow/heavy, only call it if necessary or once
                 try:
                     path = p.exe()
                 except:
                     path = "N/A"
 
-                temp.append({
-                    "PID": pid,
-                    "Name": proc.info['name'],
-                    "Mem": mem,
-                    "CPU": cpu,
-                    "Path": path
-                })
+                p_data = {"PID": pid, "Name": proc.info['name'], "Mem": mem, "CPU": cpu, "Path": path}
+                temp.append(p_data)
 
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
 
-        # Clean up the cache so we don't leak memory for closed processes
         self.process_cache = {pid: p for pid, p in self.process_cache.items() if pid in active_pids}
 
         with self.lock:
             self.processes = temp
-            # This will now catch the 80% spikes correctly!
+            # Filter for anomalies that aren't protected
             self.suspicious_processes = [
                 p for p in temp
-                if p["Mem"] > 500 or p["CPU"] > 80 or p["Name"].lower() == "virus.exe"
+                if (p["Mem"] > 400 or p["CPU"] > 60 or p["Name"].lower() == "virus.exe")
+                   and not self.is_protected(p["PID"], p["Name"], p["Path"])
             ]
+
+    def quarantine_file(self, file_path):
+        try:
+            if os.path.exists(file_path):
+                dest = os.path.join(self.quarantine_folder, os.path.basename(file_path))
+                shutil.copy2(file_path, dest)
+        except:
+            pass
+
+    def start_monitoring(self, interval=1):
+        self.running = True
+        threading.Thread(target=self._monitor_loop, args=(interval,), daemon=True).start()
 
     def _monitor_loop(self, interval):
         while self.running:
             self.get_processes_snapshot()
             time.sleep(interval)
 
-    def start_monitoring(self, interval=2):
-        self.running = True
-        t = threading.Thread(target=self._monitor_loop, args=(interval,), daemon=True)
-        t.start()
-
     def stop_monitoring(self):
         self.running = False
 
     def compute_hash(self, file_path):
-        """Safely compute SHA-256 with a 100MB size limit."""
         try:
             if not file_path or not os.path.exists(file_path): return None
-            if os.path.getsize(file_path) > 100 * 1024 * 1024: return "TOO_LARGE"
-
-            sha256_hash = hashlib.sha256()
+            sha256 = hashlib.sha256()
             with open(file_path, "rb") as f:
-                for byte_block in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(byte_block)
-            return sha256_hash.hexdigest()
-        except Exception:
+                for chunk in iter(lambda: f.read(4096), b""):
+                    sha256.update(chunk)
+            return sha256.hexdigest()
+        except:
             return None
 
     def check_suspicious_with_vt(self, vt_checker):
-        """Heavy lifting: Hash and Check VT. Designed to run in background thread."""
-        # Work on a copy to avoid locking the UI for too long
         with self.lock:
             to_check = list(self.suspicious_processes)
 
         for proc in to_check:
-            pid = proc["PID"]
-            path = proc["Path"]
-            if pid in self.reported_pids: continue
-
+            if proc["PID"] in self.reported_pids: continue
             file_hash = self.compute_hash(proc["Path"])
-            if file_hash and file_hash != "TOO_LARGE":
-                result = vt_checker.check_file_hash(file_hash, file_path=path)
-                if result and result["detections"] > 3:
+            if file_hash:
+                res = vt_checker.check_file_hash(file_hash, proc["Path"])
+                if res and res.get("detections", 0) > 3:
                     with self.lock:
-                        self.threats.append({**proc, "detections": result["detections"]})
-
-            self.reported_pids.add(pid)
+                        self.threats.append({**proc, "detections": res["detections"]})
+            self.reported_pids.add(proc["PID"])
