@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="70c9e51d-ec40-4eda-8d9d-935b919014df" name="Changes" comment="some auto changes with ide">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="70c9e51d-ec40-4eda-8d9d-935b919014df" name="Changes" comment="ui ststus changes">
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -165,7 +164,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771876315522</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="ui ststus changes">
+      <option name="closed" value="true" />
+      <created>1771877777713</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1771877777713</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -190,7 +197,8 @@
     <MESSAGE value="added is protected for system files safety when above threshold to not be deleted" />
     <MESSAGE value="trying to integrate all parts together" />
     <MESSAGE value="some auto changes with ide" />
-    <option name="LAST_COMMIT_MESSAGE" value="some auto changes with ide" />
+    <MESSAGE value="ui ststus changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="ui ststus changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

@@ -40,7 +40,7 @@ def generate_dashboard(pm):
             elif "CLEAN" in status:
                 status_display = f"[bold green]✅ {status}[/bold green]"
             else:
-                status_display = f"[dim]{status}[/dim]"
+                status_display = f"[yellow]🔍 {status}[/yellow]"
 
             table.add_row(
                 "🛡️ HISTORY",
