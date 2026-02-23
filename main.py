@@ -68,8 +68,21 @@ def security_worker(pm, vt_checker):
             # We call apply_policy here. This is where the kill actually happens.
             pm.apply_policy(p, 0)
 
-            # Step 2: Check Cloud Intelligence (VirusTotal)
-        pm.check_suspicious_with_vt(vt_checker)
+        # Step 2: Check Cloud Intelligence (VirusTotal)
+
+        with pm.lock:
+            for entry in pm.action_history:
+                if entry.get("VT_Status") in [None, "Waiting..."]:
+                    q_path = os.path.join(pm.quarantine_folder, entry["Name"])
+
+                    current_hash = pm.compute_hash(q_path)
+
+                    if current_hash:
+                        result = vt_checker.check_file_hash(current_hash, q_path)
+                        if result:
+                            entry["VT_Status"] = result["Status"]
+                            if result.get("detections", 0) > 3:
+                                entry["Action"] = "CONFIRMED MALICIOUS"
 
         # Step 3: If VT found something, kill it specifically
         with pm.lock:
