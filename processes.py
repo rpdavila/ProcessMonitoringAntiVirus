@@ -150,7 +150,7 @@ class Processes:
                 for chunk in iter(lambda: f.read(4096), b""):
                     sha256.update(chunk)
             return sha256.hexdigest()
-        except:
+        except (PermissionError, OSError):
             return None
 
     def check_suspicious_with_vt(self, vt_checker):
